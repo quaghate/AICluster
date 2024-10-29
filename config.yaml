@@ -1,0 +1,17 @@
+database:
+  host: localhost
+  user: root
+  password: sua_senha
+  database: meu_banco_de_dados
+
+initial_models:
+  - basic_model
+  - advanced_model
+
+basic_model:
+  learning_rate: 0.001
+  epochs: 10
+  batch_size: 32
+
+advanced_model:
+  # ... parâmetros do modelo avançado
