@@ -9,8 +9,8 @@ import subprocess
 
 # --- Importe suas funções de criptografia e ErrorHandler aqui ---
 from criptografia import handle_temp_file  # type: ignore
-from errorhandler import ErrorHandler
-from instalador import escolher_idioma
+from DataExpansion.errorhandler import ErrorHandler
+from DataExpansion.instalador import escolher_idioma
 
 # --- Variável global para o idioma (se necessário) ---
 language = 'pt'

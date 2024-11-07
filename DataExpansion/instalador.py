@@ -1,11 +1,11 @@
-import subprocess,sys
+import subprocess, sys, rich, logging
 from rich.progress import track
 from rich import print
-from errorhandler import ErrorHandler
+from DataExpansion.errorhandler import ErrorHandler
 
 error_handler = ErrorHandler()
 
-def instalar_bibliotecas(bibliotecas, error_handler, idioma='en'):
+def instalar_bibliotecas(bibliotecas_opcionais, arquivo, error_handler, idioma='en'):
     """Instala bibliotecas e exibe uma barra de progresso com rich.
 
     Args:
@@ -13,6 +13,18 @@ def instalar_bibliotecas(bibliotecas, error_handler, idioma='en'):
         error_handler (ErrorHandler): Instância do ErrorHandler para lidar com erros.
         idioma (str, optional): Idioma para as mensagens de erro. Defaults to 'en'.
     """
+    def importar_bibliotecas_arquivo(importar_biblioteca_arquivo, bibliotecas_opcionais):
+        bibliotecas = {
+            "DatabaseManager": ["mysql", "sqlite3", "os", "psycopg2"] + bibliotecas_opcionais,
+            "treining": ["os", "secrets", "string", "time", "subprocess", "sqlite3", "mysql.connector", "yaml"] + bibliotecas_opcionais,
+        }
+        try:
+            bibliotecas_para_importar = bibliotecas[arquivo] + (bibliotecas_opcionais or []) # Aqui pode ocorrer o KeyError
+            import bibliotecas_para_importar
+        except KeyError:
+            error_handler.handle_error('KeyError', arquivo) 
+        except Exception as e:
+            error_handler.handle_error('erro_generico', e)
 
     # Verifica se o pip está instalado
     try:
@@ -43,6 +55,5 @@ def instalar_bibliotecas(bibliotecas, error_handler, idioma='en'):
                 print(f"[blue]A biblioteca {biblioteca} pertence à biblioteca padrão do Python.[/]")
             else:
                 error_handler.handle_error('erro_instalar_biblioteca', biblioteca)
-                
 bibliotecas = ['numpy', 'pandas', 'matplotlib', 'os', 'time', 'pyyaml', 'mysql-connector-python', 'secrets', 'string', 'argparse', 'sqlite3', 'mysql','importlib', 'sys']
 instalar_bibliotecas(bibliotecas, error_handler)

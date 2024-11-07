@@ -17,6 +17,7 @@ class ErrorHandler:
             'pip_nao_instalado': '[bold red]Erro:[/] O pip não está instalado.',
             'erro_obter_bibliotecas': '[bold red]Erro:[/] Ao obter a lista de bibliotecas instaladas.',
             'erro_instalar_biblioteca': '[bold red]Erro:[/] Não foi possível instalar a biblioteca {biblioteca}.',
+            'KeyError': 'A chave "{chave}" não foi encontrada no dicionário.'
         },
         'en': {
             'file_not_found': 'The file "{file}" was not found.',
@@ -31,6 +32,7 @@ class ErrorHandler:
             'pip_nao_instalado': '[bold red]Error:[/] pip is not installed.',
             'erro_obter_bibliotecas': '[bold red]Error:[/] When obtaining the list of installed libraries.',
             'erro_instalar_biblioteca': '[bold red]Error:[/] Could not install library {biblioteca}.',
+            'KeyError': 'The key "{chave}" was not found in the dictionary.'
         },
         'ja': {
             'file_not_found': 'ファイル "{file}" が見つかりません。',
@@ -45,6 +47,7 @@ class ErrorHandler:
             'pip_nao_instalado': '[bold red]エラー:[/] pip がインストールされていません。',
             'erro_obter_bibliotecas': '[bold red]エラー:[/] インストールされているライブラリのリストを取得しています。',
             'erro_instalar_biblioteca': '[bold red]エラー:[/] ライブラリ {biblioteca} をインストールできませんでした。',
+            'KeyError': "辞書に '{chave}' というキーが見つかりません。"
         },
         'zh': {
             'file_not_found': '找不到文件 "{file}"。',
@@ -59,6 +62,7 @@ class ErrorHandler:
             'pip_nao_instalado': '[bold red]错误:[/] 未安装 pip。',
             'erro_obter_bibliotecas': '[bold red]错误:[/] 获取已安装库的列表时出错。',
             'erro_instalar_biblioteca': '[bold red]错误:[/] 无法安装库 {biblioteca}。',
+            'KeyError': "在字典中找不到键 '{chave}'。"
         },
         'es': {
             'file_not_found': 'El archivo "{file}" no se encontró.',
@@ -73,6 +77,7 @@ class ErrorHandler:
             'pip_nao_instalado': '[bold red]Error:[/] pip no está instalado.',
             'erro_obter_bibliotecas': '[bold red]Error:[/] Al obtener la lista de bibliotecas instaladas.',
             'erro_instalar_biblioteca': '[bold red]Error:[/] No se pudo instalar la biblioteca {biblioteca}.',
+            'KeyError': 'The key "{chave}" was not found in the dictionary.'
         },
     }
        self.language = self.escolher_idioma(language)
