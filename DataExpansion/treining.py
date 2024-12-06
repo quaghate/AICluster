@@ -4,19 +4,25 @@ import logging
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 from abc import ABC, abstractmethod
+import multiprocessing
+import psutil
+import gc
+from errorhandler import ErrorHandler
+import joblib
 from joblib import dump
 
 class TreinadorIA(ABC):
-    def __init__(self, db_manager, diretorio_temporario, num_iteracoes=10, **kwargs):
+    def __init__(self, db_manager, diretorio_temporario, num_iteracoes=10, memoria_maxima=None, cpu_maximo=None, **kwargs):
         self.db_manager = db_manager
         self.diretorio_temporario = diretorio_temporario
         self.num_iteracoes = num_iteracoes
+        self.memoria_maxima = memoria_maxima  # Limite máximo de memória (em bytes)
+        self.cpu_maximo = cpu_maximo  # Limite máximo de uso de CPU (em porcentagem)
         self.kwargs = kwargs
         self.logger = None  # Para configurar logging posteriormente
         self.modelo = self.criar_modelo()
-    @abstractmethod
-    def importar_bibliotecas_e_dados_necessarios(self):
-        pass
+        self.error_handler = ErrorHandler()  # Instancia o ErrorHandler
+
     @abstractmethod
     def criar_modelo(self):
         pass
@@ -50,6 +56,31 @@ class TreinadorIA(ABC):
         self.logger = logger
         print(f"Logs de treinamento serão salvos em: {log_filepath}")
 
+    def monitorar_recursos(self):
+        try:
+            if self.memoria_maxima and psutil.virtual_memory().used > self.memoria_maxima:
+                raise MemoryError("O uso de memória excedeu o limite máximo permitido.")
+            if self.cpu_maximo and psutil.cpu_percent(interval=1) > self.cpu_maximo:
+                raise RuntimeError("O uso de CPU excedeu o limite máximo permitido.")
+        except MemoryError as e:
+            self.error_handler.handle_error('memory_error', str(e), 'memória')
+        except RuntimeError as e:
+            self.error_handler.handle_error('cpu_error', str(e), 'CPU')
+
+    def treinar_multiplas_instancias(self, dados, num_instancias):
+        with multiprocessing.Pool(processes=num_instancias) as pool:
+            resultados = pool.starmap(self._treinar_instancia, [(dados, i) for i in range(num_instancias)])
+        return resultados
+
+    def _treinar_instancia(self, dados, i):
+        print(f"Treinando instância {i+1}")
+        modelo_instancia = self.criar_modelo()  # Cria uma nova instância do modelo
+        treinador_instancia = self.__class__(self.db_manager, self.diretorio_temporario, self.num_iteracoes, self.memoria_maxima, self.cpu_maximo, **self.kwargs)
+        treinador_instancia.configurar_logging(f'instancia_{i+1}')
+        treinador_instancia.monitorar_recursos()  # Monitorar recursos antes de treinar
+        modelo_instancia, precisao = treinador_instancia.treinar_modelo(dados, iteracao=i)
+        return modelo_instancia, precisao
+
     def treinar_modelo(self, dados, iteracao):
         x, y = self.pre_processar_dados(dados)
         x_treino, x_teste, y_treino, y_teste = train_test_split(x, y, test_size=0.2, random_state=42)
@@ -61,31 +92,17 @@ class TreinadorIA(ABC):
             self.logger.info(f"Iteração {iteracao}, Precisão: {precisao}")
         return self.modelo, precisao
 
-    def treinar_multiplas_instancias(self, dados, num_instancias):
-        instancias_modelos = []
-        for i in range(num_instancias):
-            print(f"Treinando instância {i+1}/{num_instancias}")
-            modelo_instancia = self.criar_modelo()  # Cria uma nova instância do modelo
-            treinador_instancia = self.__class__(self.db_manager, self.diretorio_temporario, self.num_iteracoes, **self.kwargs)
-            treinador_instancia.configurar_logging(f'instancia_{i+1}')
-            modelo_instancia, precisao = treinador_instancia.treinar_modelo(dados, iteracao=i)
-            instancias_modelos.append((modelo_instancia, precisao))
-        return instancias_modelos
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Flatten
-from tensorflow.keras.utils import to_categorical
-from sklearn.metrics import accuracy_score
-
 class TreinadorIATensorFlow(TreinadorIA):
     def __init__(self, db_manager, diretorio_temporario, num_iteracoes=10, **kwargs):
         super().__init__(db_manager, diretorio_temporario, num_iteracoes, **kwargs)
+
     def importar_bibliotecas_e_dados_necessarios(self):
+        import tensorflow as tf
         from tensorflow.keras.models import Sequential
         from tensorflow.keras.layers import Dense, Flatten
         from tensorflow.keras.utils import to_categorical
         from sklearn.metrics import accuracy_score
-        
+
     def criar_modelo(self):
         # Criar o modelo usando TensorFlow
         input_shape = self.kwargs['input_shape']
@@ -132,16 +149,17 @@ class TreinadorIATensorFlow(TreinadorIA):
         return caminho_melhor_pesos
 
 
-
 class TreinadorIAScikitLearn(TreinadorIA):
     def __init__(self, db_manager, diretorio_temporario, num_iteracoes=10, **kwargs):
         super().__init__(db_manager, diretorio_temporario, num_iteracoes, **kwargs)
-    
+
     def importar_bibliotecas_e_dados_necessarios(self):
+        import sklearn
         from sklearn.ensemble import RandomForestClassifier
         from sklearn.preprocessing import StandardScaler
         from sklearn.pipeline import make_pipeline
-    
+        from sklearn.metrics import accuracy_score
+
     def criar_modelo(self):
         # Criar o modelo usando scikit-learn
         modelo = make_pipeline(StandardScaler(), RandomForestClassifier(n_estimators=100))
@@ -153,7 +171,7 @@ class TreinadorIAScikitLearn(TreinadorIA):
         return x, y
 
     def combinar_pesos(self, instancias_modelos):
-        # é trivial combinar pesos em modelos de scikit-learn,
+        # Combinar pesos em modelos de scikit-learn não é trivial,
         # então para simplificar vamos escolher o modelo com a maior precisão
         melhor_modelo = max(instancias_modelos, key=lambda x: x[1])[0]
         return melhor_modelo
