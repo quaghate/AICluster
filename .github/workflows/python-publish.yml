@@ -24,7 +24,7 @@ jobs:
           ls  # Lista os arquivos e diretórios para verificar onde estamos
           python -m pip install --upgrade pip
           pip install setuptools wheel
-          python setup.py sdist bdist_wheel
+          python /home/runner/work/Quaghate/AICluster/setup.py sdist bdist_wheel
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
