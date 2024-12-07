@@ -20,9 +20,18 @@ jobs:
 
       - name: List current directory
         run: |
-          echo "Current directory:"
+          echo "Current directory before cd:"
           pwd
-          echo "Contents of current directory:"
+          echo "Contents before cd:"
+          ls -alh
+
+      - name: Change to correct directory
+        run: |
+          echo "Changing to directory: Quaghate/AICluster"
+          cd Quaghate/AICluster || exit 1
+          echo "Current directory after cd:"
+          pwd
+          echo "Contents after cd:"
           ls -alh
 
       - name: Upgrade pip and install build tools
@@ -34,13 +43,10 @@ jobs:
 
       - name: Build release distributions
         run: |
-          echo "Changing to directory: Quaghate/AICluster"
-          cd Quaghate/AICluster || exit 1
-          echo "Current directory after cd:"
-          pwd
-          echo "Contents of Quaghate/AICluster:"
-          ls -alh
+          echo "Building release distributions"
+          set -x  # Adiciona verbosidade para depuração
           python setup.py sdist bdist_wheel
+          set +x
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
