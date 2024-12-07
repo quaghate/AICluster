@@ -18,13 +18,22 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: List current directory
+        run: |
+          pwd
+          ls -alh
+
       - name: Build release distributions
         run: |
-          cd Quaghate/AICluster
-          ls  # Lista os arquivos e diretórios para verificar onde estamos
+          echo "Changing to directory: Quaghate/AICluster"
+          cd Quaghate/AICluster || exit 1
+          echo "Current directory:"
+          pwd
+          echo "Listing files in directory:"
+          ls -alh
           python -m pip install --upgrade pip
           pip install setuptools wheel
-          python /home/runner/work/Quaghate/AICluster/setup.py sdist bdist_wheel
+          python setup.py sdist bdist_wheel
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
@@ -58,3 +67,4 @@ jobs:
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+
