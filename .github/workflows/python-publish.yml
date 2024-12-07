@@ -20,15 +20,17 @@ jobs:
 
       - name: Build release distributions
         run: |
+          cd Quaghate/AICluster
+          ls  # Lista os arquivos e diretórios para verificar onde estamos
           python -m pip install --upgrade pip
           pip install setuptools wheel
-          python Quaghate/AICluster/setup.py sdist bdist_wheel
+          python setup.py sdist bdist_wheel
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
-          path: Quaghate/AICluster/dist/  # Certifique-se de que este é o caminho correto para o dist
+          path: Quaghate/AICluster/dist/
 
   pypi-publish:
     runs-on: ubuntu-latest
@@ -47,7 +49,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-dists
-          path: Quaghate/AICluster/dist/  # Certifique-se de que este é o caminho correto para o dist
+          path: Quaghate/AICluster/dist/
 
       - name: Publish release distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
