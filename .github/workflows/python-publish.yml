@@ -17,20 +17,17 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: List current directory
+      - name: List root directory
         run: |
-          echo "Current directory before cd:"
+          echo "Current directory at root level:"
           pwd
-          echo "Contents before cd:"
+          echo "Contents of root directory:"
           ls -alh
 
-      - name: Change to correct directory
+      - name: Find setup.py
         run: |
-          cd Quaghate/AICluster
-          echo "Current directory after cd:"
-          pwd
-          echo "Contents after cd:"
-          ls -alh
+          echo "Searching for setup.py"
+          find . -name setup.py
 
       - name: Upgrade pip and install build tools
         run: |
@@ -42,15 +39,13 @@ jobs:
       - name: Build release distributions
         run: |
           echo "Building release distributions"
-          set -x  # Adiciona verbosidade para depuração
           python setup.py sdist bdist_wheel
-          set +x
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
-          path: Quaghate/AICluster/dist/
+          path: dist/
 
   pypi-publish:
     runs-on: ubuntu-latest
@@ -69,13 +64,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-dists
-          path: Quaghate/AICluster/dist/
+          path: dist/
 
       - name: Publish release distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: Quaghate/AICluster/dist/
+          packages-dir: dist/
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-
