@@ -20,16 +20,15 @@ jobs:
 
       - name: Build release distributions
         run: |
-          cd /home/runner/work/AICluster/setup.py:  # Certifique-se de que este é o caminho correto para o seu setup.py
           python -m pip install --upgrade pip
           pip install setuptools wheel
-          python setup.py sdist bdist_wheel
+          python Quaghate/AICluster/setup.py sdist bdist_wheel
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
-          path: /home/runner/work/AICluster/setup.py  # Certifique-se de que este é o caminho correto para o dist
+          path: Quaghate/AICluster/dist/  # Certifique-se de que este é o caminho correto para o dist
 
   pypi-publish:
     runs-on: ubuntu-latest
