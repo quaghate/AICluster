@@ -1,8 +1,7 @@
-name: Upload Python Package
+name: Build and Publish Python Package
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,8 +26,7 @@ jobs:
 
       - name: Change to correct directory
         run: |
-          echo "Changing to directory: Quaghate/AICluster"
-          cd Quaghate/AICluster || exit 1
+          cd Quaghate/AICluster
           echo "Current directory after cd:"
           pwd
           echo "Contents after cd:"
@@ -80,3 +78,4 @@ jobs:
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+
