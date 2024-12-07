@@ -20,6 +20,7 @@ jobs:
 
       - name: Build release distributions
         run: |
+          cd Quaghate/AICluster  # Ajusta para o diretório correto
           python -m pip install --upgrade pip
           pip install setuptools wheel
           python setup.py sdist bdist_wheel
@@ -28,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
-          path: dist/
+          path: Quaghate/AICluster/dist/  # Ajusta para o diretório correto
 
   pypi-publish:
     runs-on: ubuntu-latest
@@ -47,13 +48,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-dists
-          path: dist/
+          path: Quaghate/AICluster/dist/  # Ajusta para o diretório correto
 
       - name: Publish release distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: dist/
+          packages-dir: Quaghate/AICluster/dist/
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+
 
